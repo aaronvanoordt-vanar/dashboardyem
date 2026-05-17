@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>YEM Pipeline · Dashboard</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="styles/base.css" />
+  <link rel="stylesheet" href="styles/components.css" />
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
+  <script src="config.js" defer></script>
+  <script type="module" src="js/main.js"></script>
+</head>
+<body>
+
+  <!-- Gate -->
+  <div id="gate" class="gate">
+    <div class="gate-box">
+      <div class="gate-logo">🚀</div>
+      <h1>YEM Pipeline</h1>
+      <p class="muted">Visibilidad del pipeline en tiempo real</p>
+      <form id="gate-form" onsubmit="return false;">
+        <input type="password" id="gate-pwd" placeholder="Clave de acceso" autofocus autocomplete="off" />
+        <button type="submit" id="gate-btn" class="btn btn-primary btn-block">Entrar</button>
+      </form>
+      <p id="gate-err" class="err"></p>
+    </div>
+  </div>
+
+  <!-- App shell -->
+  <div id="app" class="app hidden">
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <span class="logo-icon">🚀</span>
+        <span class="logo-text">
+          <span class="logo-title">YEM</span>
+          <span class="logo-sub">Pipeline</span>
+        </span>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="#/overview" class="nav-item" data-route="overview">
+          <span class="nav-icon">📊</span><span>Overview</span>
+        </a>
+        <a href="#/pipeline" class="nav-item" data-route="pipeline">
+          <span class="nav-icon">🎯</span><span>Pipeline</span>
+        </a>
+        <a href="#/leads" class="nav-item" data-route="leads">
+          <span class="nav-icon">👥</span><span>Leads</span>
+          <span class="nav-badge" id="nav-leads-count">—</span>
+        </a>
+        <a href="#/analytics" class="nav-item" data-route="analytics">
+          <span class="nav-icon">📈</span><span>Analytics</span>
+        </a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="status-pill">
+          <span class="status-dot" id="status-dot"></span>
+          <span id="status-text">conectando...</span>
+        </div>
+        <button id="logout-btn" class="btn-ghost-small" title="Cerrar sesión">↩</button>
+      </div>
+    </aside>
+
+    <div class="main">
+      <header class="topbar">
+        <div class="topbar-left">
+          <h2 id="page-title">Overview</h2>
+          <span id="page-subtitle" class="muted"></span>
+        </div>
+        <div class="topbar-right">
+          <button id="refresh-btn" class="btn-ghost" title="Refrescar (auto cada 30s)">
+            <span class="refresh-icon">↻</span>
+            <span class="refresh-text">Refrescar</span>
+          </button>
+          <span id="last-update" class="muted last-update">—</span>
+        </div>
+      </header>
+
+      <main id="page-container" class="page-container"></main>
+    </div>
+
+    <!-- Drawer para detalle de lead -->
+    <div id="lead-drawer" class="drawer hidden">
+      <div class="drawer-bg" data-close-drawer></div>
+      <aside class="drawer-panel">
+        <header class="drawer-header">
+          <div>
+            <h3 id="drawer-name">—</h3>
+            <span id="drawer-meta" class="muted"></span>
+          </div>
+          <button class="close-btn" data-close-drawer>×</button>
+        </header>
+        <div class="drawer-tabs">
+          <button class="tab-btn active" data-tab="conversation">💬 Conversación</button>
+          <button class="tab-btn" data-tab="info">ℹ️ Info</button>
+          <button class="tab-btn" data-tab="activity">📋 Actividad</button>
+        </div>
+        <div class="drawer-content">
+          <section id="tab-conversation" class="tab-panel active"></section>
+          <section id="tab-info" class="tab-panel"></section>
+          <section id="tab-activity" class="tab-panel"></section>
+        </div>
+        <footer class="drawer-actions" id="drawer-actions"></footer>
+      </aside>
+    </div>
+
+    <!-- Toast container -->
+    <div id="toast-container" class="toast-container"></div>
+  </div>
+
+</body>
+</html>
