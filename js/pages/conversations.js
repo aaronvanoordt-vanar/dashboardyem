@@ -2,8 +2,8 @@
 // Conversaciones — Inbox estilo WhatsApp
 // ============================================================
 import { getState, subscribe } from "../state.js";
-import { fetchConversationsForPhone } from "../api.js";
-import { escapeHtml, formatRelative, formatDateTime, stageMeta, nameInitial, whatsappLink, debounce } from "../utils.js";
+import { fetchConversationsForPhone, sendMessage, isSendEnabled } from "../api.js";
+import { escapeHtml, formatRelative, formatDateTime, stageMeta, nameInitial, whatsappLink, debounce, toast } from "../utils.js";
 
 let unsubscribe = null;
 let selectedPhone = null;
@@ -203,14 +203,34 @@ function chatHeaderMetaInner(lead) {
 }
 
 function chatFooterHtml(lead) {
+  // Si el envio desde dashboard NO esta configurado, mostramos el CTA viejo al WhatsApp.
+  if (!isSendEnabled()) {
+    return `
+      <footer class="chat-footer">
+        <a class="chat-reply-cta" href="${whatsappLink(lead.phone)}" target="_blank" rel="noopener">
+          <span>↗</span>
+          <span>Responder desde tu WhatsApp</span>
+        </a>
+        <small class="dim">Para responder directo desde aquí, configura SEND_WEBHOOK_URL en config.js</small>
+      </footer>
+    `;
+  }
+  // Input para enviar mensaje desde el dashboard
   return `
-    <footer class="chat-footer">
-      <a class="chat-reply-cta" href="${whatsappLink(lead.phone)}" target="_blank" rel="noopener">
-        <span>↗</span>
-        <span>Responder desde tu WhatsApp</span>
-      </a>
-      <small class="dim">El bot sigue activo en este chat. Para tomar el control desde WhatsApp, contesta desde tu app.</small>
+    <footer class="chat-footer chat-footer-input">
+      <textarea
+        id="chat-input"
+        class="chat-input"
+        placeholder="Escribí tu respuesta como Marcel..."
+        rows="1"
+      ></textarea>
+      <button id="chat-send-btn" class="chat-send-btn" title="Enviar mensaje (Enter)">
+        <span class="send-icon">➤</span>
+      </button>
     </footer>
+    <div class="chat-footer-note">
+      <small class="dim">📤 Al enviar, el mensaje sale del WhatsApp de YEM y el bot se silencia para este lead. Shift+Enter = nueva línea.</small>
+    </div>
   `;
 }
 
@@ -224,6 +244,69 @@ function bindChatActions(lead) {
         setTimeout(() => { btn.textContent = "📋 " + lead.phone; }, 1500);
       } catch {}
     });
+  }
+
+  // Input de envio de mensaje
+  const input = document.getElementById("chat-input");
+  const sendBtn = document.getElementById("chat-send-btn");
+  if (input && sendBtn) {
+    // Auto-resize del textarea segun contenido
+    const autoSize = () => {
+      input.style.height = "auto";
+      input.style.height = Math.min(input.scrollHeight, 140) + "px";
+    };
+    input.addEventListener("input", autoSize);
+
+    // Enter envia, Shift+Enter hace nueva linea
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        handleSend(lead);
+      }
+    });
+    sendBtn.addEventListener("click", () => handleSend(lead));
+    input.focus();
+  }
+}
+
+async function handleSend(lead) {
+  const input = document.getElementById("chat-input");
+  const sendBtn = document.getElementById("chat-send-btn");
+  if (!input || !sendBtn) return;
+  const text = input.value.trim();
+  if (!text) return;
+
+  sendBtn.disabled = true;
+  sendBtn.classList.add("sending");
+
+  // Optimistic UI: agregar el mensaje al chat ahora mismo
+  const optimisticMsg = {
+    role: "assistant",
+    message_text: text,
+    intent: "manual_marcel",
+    message_timestamp: new Date().toISOString()
+  };
+  const cached = convoCache.get(lead.phone) || [];
+  const next = [...cached, optimisticMsg];
+  convoCache.set(lead.phone, next);
+  renderMessages(next, true);
+
+  try {
+    await sendMessage(lead.phone, text);
+    input.value = "";
+    input.style.height = "auto";
+    toast("Mensaje enviado ✓", "success");
+    // Refrescar de la DB en 1s para obtener el mensaje real (no el optimistic)
+    setTimeout(() => reloadOpenChat(), 1500);
+  } catch (err) {
+    // Rollback del optimistic
+    convoCache.set(lead.phone, cached);
+    renderMessages(cached, false);
+    toast("Error al enviar: " + err.message, "error");
+  } finally {
+    sendBtn.disabled = false;
+    sendBtn.classList.remove("sending");
+    input.focus();
   }
 }
 
