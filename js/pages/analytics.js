@@ -68,6 +68,8 @@ export function render() {
 }
 
 function update(state) {
+  // Guard: si la pagina ya no esta montada, no updatear
+  if (!document.getElementById("a-kpis")) return;
   const since = daysAgo(period).getTime();
   const leadsInPeriod = state.leads.filter(l => l.created_at && new Date(l.created_at).getTime() >= since);
   renderKPIs(leadsInPeriod, state);
