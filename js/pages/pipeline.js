@@ -20,6 +20,9 @@ export function render() {
 }
 
 function update(state) {
+  // Guard: si la pagina ya no esta montada, no updatear
+  const kanban = document.getElementById("kanban");
+  if (!kanban) return;
   const leads = state.leads;
   const byStage = {};
   for (const stage of PIPELINE_COLUMNS) byStage[stage] = [];
@@ -27,8 +30,6 @@ function update(state) {
     const s = byStage[l.lead_stage] ? l.lead_stage : "new";
     byStage[s].push(l);
   }
-  const kanban = document.getElementById("kanban");
-  if (!kanban) return;
   kanban.innerHTML = PIPELINE_COLUMNS.map(stage => {
     const list = byStage[stage] || [];
     const meta = stageMeta(stage);
