@@ -6,11 +6,12 @@ import { getState, setState } from "./state.js";
 import { registerRoute, start as startRouter } from "./router.js";
 import { toast } from "./utils.js";
 
-import * as overview  from "./pages/overview.js";
-import * as pipeline  from "./pages/pipeline.js";
-import * as leads     from "./pages/leads.js";
-import * as analytics from "./pages/analytics.js";
-import * as leadDetail from "./pages/lead-detail.js";
+import * as overview      from "./pages/overview.js";
+import * as pipeline      from "./pages/pipeline.js";
+import * as leads         from "./pages/leads.js";
+import * as conversations from "./pages/conversations.js";
+import * as analytics     from "./pages/analytics.js";
+import * as leadDetail    from "./pages/lead-detail.js";
 
 const REFRESH_INTERVAL_MS = 30000;
 let refreshTimer = null;
@@ -90,10 +91,11 @@ function enterApp() {
   });
 
   // Register routes
-  registerRoute("overview",  overview.render);
-  registerRoute("pipeline",  pipeline.render);
-  registerRoute("leads",     leads.render);
-  registerRoute("analytics", analytics.render);
+  registerRoute("overview",      overview.render);
+  registerRoute("pipeline",      pipeline.render);
+  registerRoute("conversations", conversations.render);
+  registerRoute("leads",         leads.render);
+  registerRoute("analytics",     analytics.render);
   startRouter();
 
   // Inicial load
