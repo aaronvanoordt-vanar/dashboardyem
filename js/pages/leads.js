@@ -91,6 +91,8 @@ export function render() {
 }
 
 function update(state) {
+  // Guard: si la pagina ya no esta montada, no updatear
+  if (!document.getElementById("leads-tbody")) return;
   populateSelects(state.leads);
   const filtered = currentFiltered(state.leads);
   document.getElementById("f-count").textContent = `${filtered.length} de ${state.leads.length}`;
