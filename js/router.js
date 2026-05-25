@@ -23,7 +23,10 @@ export function start() {
 }
 
 function render() {
-  let name = (location.hash || "").replace(/^#\//, "") || "overview";
+  // El hash puede tener query: #/conversations?phone=51999...
+  // Sacamos solo el nombre de la ruta, ignorando el query string.
+  let raw = (location.hash || "").replace(/^#\//, "");
+  let name = raw.split("?")[0] || "overview";
   if (!routes.has(name)) name = "overview";
   currentRoute = name;
   // Highlight sidebar
