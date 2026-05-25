@@ -60,6 +60,10 @@ export function render() {
 }
 
 function update(state) {
+  // Guard: si la pagina overview ya no esta montada (usuario navego a otra),
+  // no intentar updatear el DOM — esto evita TypeError null cuando los
+  // elementos ya no existen.
+  if (!document.getElementById("kpi-grid")) return;
   if (!state.leads.length && state.loading) {
     return; // espera
   }
