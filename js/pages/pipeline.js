@@ -35,8 +35,11 @@ function update(state) {
     return `
       <div class="kanban-col">
         <div class="kanban-col-header">
-          <div class="kanban-col-title" style="color:${meta.color}">
-            ${meta.icon} ${escapeHtml(meta.label)}
+          <div>
+            <div class="kanban-col-title" style="color:${meta.color}">
+              ${meta.icon} ${escapeHtml(meta.label)}
+            </div>
+            ${meta.desc ? `<div class="kanban-col-desc">${escapeHtml(meta.desc)}</div>` : ""}
           </div>
           <span class="kanban-col-count">${list.length}</span>
         </div>
