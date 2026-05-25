@@ -118,8 +118,10 @@ function itemHtml(lead) {
 
 async function openChat(phone) {
   selectedPhone = phone;
-  // Actualizar URL para deep-link
-  location.hash = `/conversations?phone=${encodeURIComponent(phone)}`;
+  // Actualizar URL para deep-link SIN disparar el router (replaceState)
+  try {
+    history.replaceState(null, "", `#/conversations?phone=${encodeURIComponent(phone)}`);
+  } catch {}
   // Marcar como seleccionado en la lista
   document.querySelectorAll(".inbox-item").forEach(el => {
     el.classList.toggle("selected", el.dataset.phone === phone);
