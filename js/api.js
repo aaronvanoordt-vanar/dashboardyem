@@ -87,3 +87,37 @@ export async function fetchInteractionsForLead(leadId, limit = 100) {
   if (error) throw error;
   return data || [];
 }
+
+// --- Send message via n8n webhook ---
+export function isSendEnabled() {
+  return typeof SEND_WEBHOOK_URL !== "undefined"
+    && typeof SEND_AUTH_TOKEN !== "undefined"
+    && SEND_WEBHOOK_URL && SEND_AUTH_TOKEN;
+}
+
+export async function sendMessage(phone, message) {
+  if (!isSendEnabled()) {
+    throw new Error("Envio desde dashboard no configurado (SEND_WEBHOOK_URL vacio en config.js)");
+  }
+  const cleanPhone = String(phone || "").replace(/[^0-9]/g, "");
+  const cleanMsg   = String(message || "").trim();
+  if (!cleanPhone) throw new Error("Telefono invalido");
+  if (!cleanMsg)   throw new Error("Mensaje vacio");
+
+  const res = await fetch(SEND_WEBHOOK_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      auth_token: SEND_AUTH_TOKEN,
+      phone: cleanPhone,
+      message: cleanMsg
+    })
+  });
+
+  if (res.status === 401) throw new Error("Token de autenticacion invalido");
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(`Error ${res.status}: ${text || "no se pudo enviar"}`);
+  }
+  return res.json().catch(() => ({ status: "ok" }));
+}
