@@ -48,30 +48,74 @@ export function daysAgo(n) {
   return d;
 }
 
-// Stage display & meta
+// Stage display & meta — labels en español con descripcion clara
 export const STAGE_META = {
-  new:                    { label: "New",          color: "var(--stage-new)",        icon: "🆕" },
-  qualifying:             { label: "Qualifying",   color: "var(--stage-qualifying)", icon: "🔍" },
-  info_sent:              { label: "Info Sent",    color: "var(--stage-info)",       icon: "📄" },
-  active:                 { label: "Active",       color: "var(--success)",          icon: "💬" },
-  ready_for_human_close:  { label: "Trial Slot",   color: "var(--stage-hot)",        icon: "🔥" },
-  ready_to_enroll:        { label: "Ready Enroll", color: "var(--stage-ready)",      icon: "✅" },
-  requires_human:         { label: "Human",        color: "var(--stage-human)",      icon: "👤" }
+  new: {
+    label: "Nuevo contacto",
+    desc:  "Acaba de escribir, sin info del peque todavía",
+    color: "var(--stage-new)",
+    icon:  "🆕"
+  },
+  qualifying: {
+    label: "Calificando",
+    desc:  "Respondiendo el triaje (edad, experiencia, LEGO)",
+    color: "var(--stage-qualifying)",
+    icon:  "🔍"
+  },
+  info_sent: {
+    label: "Info enviada",
+    desc:  "Ya recibió detalles del programa recomendado",
+    color: "var(--stage-info)",
+    icon:  "📄"
+  },
+  active: {
+    label: "En conversación",
+    desc:  "Activo, haciendo preguntas",
+    color: "var(--success)",
+    icon:  "💬"
+  },
+  ready_for_human_close: {
+    label: "Cita programada",
+    desc:  "🔥 Pidió clase de prueba con día/hora — Marcel debe confirmar",
+    color: "var(--stage-hot)",
+    icon:  "🔥"
+  },
+  ready_to_enroll: {
+    label: "Listo p/ matricular",
+    desc:  "✅ Quiere inscribirse, Marcel cierra la matrícula",
+    color: "var(--stage-ready)",
+    icon:  "✅"
+  },
+  requires_human: {
+    label: "Escalado a Marcel",
+    desc:  "Pidió hablar con humano, queja, o tema admin",
+    color: "var(--stage-human)",
+    icon:  "👤"
+  }
 };
 
 export function stageMeta(stage) {
-  return STAGE_META[stage] || { label: stage || "—", color: "var(--stage-other)", icon: "•" };
+  return STAGE_META[stage] || { label: stage || "—", desc: "", color: "var(--stage-other)", icon: "•" };
 }
 
-// Pipeline columns order
+// Pipeline columns en orden de avance del lead
 export const PIPELINE_COLUMNS = [
   "new",
   "qualifying",
+  "info_sent",
   "active",
   "ready_for_human_close",
   "ready_to_enroll",
   "requires_human"
 ];
+
+// Inicial de un nombre para avatar fallback
+export function nameInitial(name) {
+  if (!name) return "?";
+  const s = String(name).trim();
+  if (!s || s === "Contacto") return "?";
+  return s.charAt(0).toUpperCase();
+}
 
 export function isHotStage(stage) {
   return stage === "ready_for_human_close" || stage === "ready_to_enroll";
